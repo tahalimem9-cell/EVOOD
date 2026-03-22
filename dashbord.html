@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Dashboard - Evod AI</title>
+<link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<script>
+if(localStorage.getItem("auth")!=="true"){
+window.location.href="login.html";
+}
+</script>
+
+<div class="container">
+
+<h1> Evod AI Dashboard</h1>
+
+<div style="display:flex;gap:60px;margin-bottom:50px;">
+
+<div class="card" style="flex:1;text-align:center;">
+<h2 id="totalLeads">0</h2>
+<p>Total Leads</p>
+</div>
+
+<div class="card" style="flex:1;text-align:center;">
+<h2>Live</h2>
+<p>Status</p>
+</div>
+
+</div>
+
+<div class="card">
+
+<h2>📋 Leads List</h2>
+
+<table id="table">
+<tr>
+<th> Customer Name</th>
+<th> Customer Email</th>
+</tr>
+</table>
+
+<br>
+
+<button onclick="exportCSV()">Export Leads</button>
+
+</div>
+
+</div>
+
+<script>
+
+async function loadLeads(){
+
+let res = await fetch("http://127.0.0.1:8000/leads");
+let data = await res.json();
+
+document.getElementById("totalLeads").innerText = data.length;
+
+let table = document.getElementById("table");
+
+data.forEach(lead=>{
+let row = `
+<tr>
+<td>${lead.name}</td>
+<td>${lead.email}</td>
+</tr>
+`;
+table.innerHTML += row;
+});
+
+}
+
+function exportCSV(){
+
+let rows = document.querySelectorAll("table tr");
+let csv = [];
+
+rows.forEach(row=>{
+let cols = row.querySelectorAll("td, th");
+let data = [];
+cols.forEach(col=>data.push(col.innerText));
+csv.push(data.join(","));
+});
+
+let blob = new Blob([csv.join("\n")], {type:"text/csv"});
+let url = window.URL.createObjectURL(blob);
+
+let a = document.createElement("a");
+a.href = url;
+a.download = "leads.csv";
+a.click();
+
+}
+
+loadLeads();
+
+</script>
+
+</body>
+</html>
